@@ -1,31 +1,20 @@
-from pathlib import Path
+import os
 
-inputDirectory = input(Path("Please enter the directory to copy from: "))
+def ValidDirectory(userDirectoryPath):
+    try:
+        while os.path.isdir(userDirectoryPath) == False:
+            userDirectoryPath = input("Please enter a valid directory: ")
+        # raise FileNotFoundError(f"{userDirectoryPath} directory not valid!")
+        if os.path.isdir(userDirectoryPath) == True:
+            print(f"{userDirectoryPath} is a valid directory!")
+# except FileNotFoundError as e:
+#     print(e)
+    except Exception:
+        print(f"{Exception} unexpected error occurred.")
 
-print("Input directory is: " + inputDirectory)
+sourceDirectory = input("Please enter the directory to copy from: ")
+ValidDirectory(sourceDirectory)
 
-print(inputDirectory.exists(inputDirectory))
-
-
-
-# def IsValidDirectory(inputDirectory):
-#     try: 
-#         isdir(inputDirectory)
-#     except Exception:
-#         print("Invalid directory!")
-#         inputDirectory = input("Please enter a valid directory: ")
-
-# if IsValidDirectory(inputDirectory) == True:
-#     print("Directory is valid!")
-# else:
-#     print("Directory is invalid!")
-
-# if IsValidDirectory(inputDirectory) == True:
-#     print("Directory input is valid!")
-# elif IsValidDirectory(inputDirectory) == False:
-#     print("Directory input is not valid!")
-    
-
-
-
+destinationDirectory = input("Please enter the destination directory: ")
+ValidDirectory(destinationDirectory)
 
