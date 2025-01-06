@@ -21,11 +21,16 @@ ValidateDirectory(destinationDirectory)
 def CopyDirectory(source, destination):
     shutil.copytree(source, destination, dirs_exist_ok=True)
 
+def MoveDirectory(source, destination):
+    shutil.copytree(source, destination, dirs_exist_ok=True)
+    shutil.rmtree(source)
+
 def ChooseOperation():
     operationState = input("Enter the function you want to do.\n(C)opy or (M)ove: ")
     if operationState == "C":
         CopyDirectory(sourceDirectory, destinationDirectory)
-    else:
-        pass
+    elif operationState == "M":
+        MoveDirectory(sourceDirectory, destinationDirectory)
+        
 
 ChooseOperation()
