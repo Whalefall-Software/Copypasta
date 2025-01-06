@@ -1,4 +1,5 @@
 import os
+import shutil
 
 def ValidateDirectory(userDirectoryPath):
     try:
@@ -16,3 +17,15 @@ ValidateDirectory(sourceDirectory)
 
 destinationDirectory = input("Please enter the destination directory: ")
 ValidateDirectory(destinationDirectory)
+
+def CopyDirectory(source, destination):
+    shutil.copytree(source, destination, dirs_exist_ok=True)
+
+def ChooseOperation():
+    operationState = input("Enter the function you want to do.\n(C)opy or (M)ove: ")
+    if operationState == "C":
+        CopyDirectory(sourceDirectory, destinationDirectory)
+    else:
+        pass
+
+ChooseOperation()
