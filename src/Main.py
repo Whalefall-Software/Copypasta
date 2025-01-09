@@ -1,5 +1,6 @@
 import os
 import shutil
+import Gui
 
 def ValidateDirectory(userDirectoryPath):
     try:
