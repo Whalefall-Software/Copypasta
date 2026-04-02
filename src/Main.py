@@ -35,9 +35,9 @@ def MoveDirectory(source, destination):
 
 def ChooseOperation():
     operationState = input("Enter the function you want to do.\n(C)opy or (M)ove: ")
-    if operationState.upper == "C":
+    if operationState == "C" or "c":
         CopyDirectory(sourceDirectory, destinationDirectory)
-    elif operationState.upper == "M":
+    elif operationState == "M" or "m":
         MoveDirectory(sourceDirectory, destinationDirectory)
         
 ChooseOperation()
