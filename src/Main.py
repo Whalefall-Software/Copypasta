@@ -1,7 +1,6 @@
 import os
 import shutil
 import filecmp
-from filecmp import dircmp
 
 def ValidateDirectory(userDirectoryPath):
     try:
@@ -38,7 +37,6 @@ def MoveDirectory(source, destination):
 def ValidateOperation(source, destination):
     try:
         dirDiff = filecmp.dircmp(source, destination)
-        #dirDiff.report_full_closure()
         if dirDiff.diff_files:
             print(f"Mismatched files: {dirDiff.diff_files}")
         if dirDiff.left_only or dirDiff.right_only:
@@ -47,7 +45,7 @@ def ValidateOperation(source, destination):
         else:
             print(f"Contents of contents of {source} to {destination} match.")
     except:
-        print(f"Error vaditating contents of {source} to {destination}")
+        print(f"Error validating contents of {source} to {destination}")
     
 def ChooseOperation():
     operationState = input("Enter the function you want to do.\n(C)opy, (M)ove, or (V)alidate: ")
@@ -55,7 +53,7 @@ def ChooseOperation():
         CopyDirectory(sourceDirectory, destinationDirectory)
     elif operationState == "M":
         MoveDirectory(sourceDirectory, destinationDirectory)
-    elif operationState == "V":
+    elif operationState == "V" or "v":
         ValidateOperation(sourceDirectory, destinationDirectory)
         
 ChooseOperation()
