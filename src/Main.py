@@ -49,9 +49,9 @@ def ValidateOperation(source, destination):
     
 def ChooseOperation():
     operationState = input("Enter the function you want to do.\n(C)opy, (M)ove, or (V)alidate: ")
-    if operationState == "C":
+    if operationState == "C" or "c":
         CopyDirectory(sourceDirectory, destinationDirectory)
-    elif operationState == "M":
+    elif operationState == "M" or "m":
         MoveDirectory(sourceDirectory, destinationDirectory)
     elif operationState == "V" or "v":
         ValidateOperation(sourceDirectory, destinationDirectory)
