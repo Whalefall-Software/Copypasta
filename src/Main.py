@@ -46,14 +46,30 @@ def ValidateOperation(source, destination):
             print(f"Contents of contents of {source} to {destination} match.")
     except:
         print(f"Error validating contents of {source} to {destination}")
+        
+def ByteValidateOperation(source, destination):
+    try:
+        dirDiff = filecmp.dircmp(source, destination, shallow=False)
+        if dirDiff.diff_files:
+            print(f"Mismatched files: {dirDiff.diff_files}")
+        if dirDiff.left_only or dirDiff.right_only:
+            print(f"Only in source: {dirDiff.left_only}")
+            print(f"Only in destination: {dirDiff.right_only}")
+        else:
+            print(f"Contents of contents of {source} to {destination} match.")
+    except:
+        print(f"Error validating contents of {source} to {destination}")
     
 def ChooseOperation():
-    operationState = input("Enter the function you want to do.\n(C)opy, (M)ove, or (V)alidate: ")
+    operationState = input("Enter the function you want to do.\n(C)opy, (M)ove, (V)alidate, or (B)yte by byte validate: ")
     if operationState == "C" or "c":
         CopyDirectory(sourceDirectory, destinationDirectory)
     elif operationState == "M" or "m":
         MoveDirectory(sourceDirectory, destinationDirectory)
     elif operationState == "V" or "v":
         ValidateOperation(sourceDirectory, destinationDirectory)
+    elif operationState == "B" or "b":
+        ByteValidateOperation(sourceDirectory, destinationDirectory)
+        
         
 ChooseOperation()
