@@ -2,22 +2,6 @@ import os
 import shutil
 import filecmp
 
-def ChooseOperation():
-    operationState = ""
-    operationState = input("Enter the function you want to do.\n(C)opy or (M)ove: ")
-    # match operationState.lower():
-    #     case 'c': 
-    #         CopyDirectory(sourceDirectory, destinationDirectory)
-    #     case 'm':
-    #         MoveDirectory(sourceDirectory, destinationDirectory)
-    #     case _:
-    #         print("Error: Invalid input given!")
-
-    if operationState == "C" or "c":
-        CopyDirectory(sourceDirectory, destinationDirectory)
-    elif operationState == "M" or "m":
-        MoveDirectory(sourceDirectory, destinationDirectory)
-
 def ValidateDirectory(userDirectoryPath):
     try:
         while os.path.isdir(userDirectoryPath) == False:
@@ -50,34 +34,40 @@ def MoveDirectory(source, destination):
         print(f"Error moving directory {source}: {e}")
     else:
         print(f"Moving directory {source} to {destination} was successful.")
-
-sourceDirectory: str = input("Please enter the source directory: ")
-ValidateDirectory(sourceDirectory)
-
-destinationDirectory: str = input("Please enter the destination directory: ")
-ValidateDirectory(destinationDirectory)
-
-ChooseOperation()
-def ValidateOperation(source, destination):
+        
+def ValidateOperation(source, destination, depth):
+    filecmp.clear_cache() #Used to eliminate cached comparison results that can give innacurate results
     try:
-        dirDiff = filecmp.dircmp(source, destination)
+        dirDiff = filecmp.dircmp(source, destination, shallow=depth)
         if dirDiff.diff_files:
             print(f"Mismatched files: {dirDiff.diff_files}")
-        if dirDiff.left_only or dirDiff.right_only:
+        elif dirDiff.left_only or dirDiff.right_only:
             print(f"Only in source: {dirDiff.left_only}")
             print(f"Only in destination: {dirDiff.right_only}")
         else:
             print(f"Contents of contents of {source} to {destination} match.")
     except:
         print(f"Error validating contents of {source} to {destination}")
-    
-def ChooseOperation():
-    operationState = input("Enter the function you want to do.\n(C)opy, (M)ove, or (V)alidate: ")
-    if operationState == "C" or "c":
-        CopyDirectory(sourceDirectory, destinationDirectory)
-    elif operationState == "M" or "m":
-        MoveDirectory(sourceDirectory, destinationDirectory)
-    elif operationState == "V" or "v":
-        ValidateOperation(sourceDirectory, destinationDirectory)
         
+sourceDirectory: str = input("Please enter the source directory: ")
+ValidateDirectory(sourceDirectory)
+
+destinationDirectory: str = input("Please enter the destination directory: ")
+ValidateDirectory(destinationDirectory)
+   
+def ChooseOperation():
+    operationState = ""
+    operationState = input("Enter the function you want to do.\n(C)opy, (M)ove, (V)alidate, or (B)yte-by-byte validation: ")
+    match operationState.lower():
+        case 'c': 
+            CopyDirectory(sourceDirectory, destinationDirectory)
+        case 'm':
+            MoveDirectory(sourceDirectory, destinationDirectory)
+        case 'v':
+            ValidateOperation(sourceDirectory, destinationDirectory, False)
+        case 'b':
+            ValidateOperation(sourceDirectory, destinationDirectory, True)
+        case _:
+            print("Error: Invalid input given!")
+
 ChooseOperation()
