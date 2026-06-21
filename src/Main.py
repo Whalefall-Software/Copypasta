@@ -2,6 +2,8 @@ import os
 import shutil
 import Gui
 
+Gui.launch()
+
 def ValidateDirectory(userDirectoryPath):
     try:
         while os.path.isdir(userDirectoryPath) == False:

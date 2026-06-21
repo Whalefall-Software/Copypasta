@@ -15,3 +15,7 @@ Thumbs.db
 
 # MacOS specific file used for folder attributes
 *.DS_Store
+
+# Python interpreter cache files
+*__pycache__
+
