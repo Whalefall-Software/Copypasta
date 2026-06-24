@@ -82,7 +82,7 @@ def MoveDirectory(source, destination):
         print(f"Moving directory {source} to {destination} was successful.")
         
 def ValidateOperation(source, destination, depth):
-    filecmp.clear_cache() #Used to eliminate cached comparison results that can give innacurate results
+    filecmp.clear_cache() # Used to eliminate cached comparison results that can give inaccurate results
     try:
         dirDiff = filecmp.dircmp(source, destination)
         if dirDiff.diff_files:
@@ -114,7 +114,6 @@ def ChooseOperation(sourceDirectory, destinationDirectory):
         case 'c': 
             CopyDirectory(sourceDirectory, destinationDirectory)
         case 'm':
-            
             MoveDirectory(sourceDirectory, destinationDirectory)
         case 'v':
             ValidateOperation(sourceDirectory, destinationDirectory, False)
@@ -122,7 +121,6 @@ def ChooseOperation(sourceDirectory, destinationDirectory):
             ValidateOperation(sourceDirectory, destinationDirectory, True)
         case _:
             print("Error: Invalid input given!")
-
 
 src: str = input("Please enter the source directory: ")
 ValidateDirectory(src)
