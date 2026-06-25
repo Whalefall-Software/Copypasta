@@ -4,7 +4,7 @@ import filecmp
 import click
 import Gui
 
-Gui.launch()
+Gui.Launch()
 
 def ValidateDirectory(userDirectoryPath):
     try:
