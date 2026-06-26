@@ -1,3 +1,4 @@
+import Main
 import tkinter as tk
 from tkinter import filedialog
 
@@ -7,7 +8,7 @@ class App():
         self.root = root
         self.root.title("Copypasta")
         # self.root.geometry("800x900")
-        self.ui(root)
+        self.Ui(root)
         root.minsize(root.winfo_width(), root.winfo_height())
         self.root.mainloop()
     
@@ -15,7 +16,7 @@ class App():
     def BrowseDir(self):
         dirName = filedialog.askdirectory(initialdir='/', title="Select a Directory")
         
-    def ui(self, root):
+    def Ui(self, root):
         selected = tk.StringVar()
         radioBtnCopy = tk.Radiobutton(text='Copy', value=1, variable=selected).grid(row=0,column=10)
         radioBtnMove = tk.Radiobutton(text='Move', value=2, variable=selected).grid(row=0,column=11)
@@ -40,6 +41,13 @@ class App():
 
         btnDistDir = tk.Button(root, text="DIST", font=("IBM Plex Mono", 8), command=self.BrowseDir)
         btnDistDir.grid(row=2, column= 15)
+
+    def Validation(self, Ui):
+        src: str = Ui.srcDirTextBox.get("1.0",tk.END)
+        Main.ValidateDirectory(src)
+        
+        dist: str = Ui.distDirTxtBox.get("1.0",tk.END)
+        Main.ValidateDirectory(dist)
 
 def Launch():
     root = tk.Tk()
