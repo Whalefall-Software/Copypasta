@@ -3,7 +3,7 @@ import shutil
 import filecmp
 import click
 
-def ValidateDirectory(userDirectoryPath):
+def ValidateDirectory(userDirectoryPath): 
     try:
         while os.path.isdir(userDirectoryPath) == False:
             userDirectoryPath = input("Please enter a valid directory: ")
@@ -123,9 +123,13 @@ def ChooseOperation(sourceDirectory, destinationDirectory):
             print("Error: Invalid input given!")
 
 src: str = input("Please enter the source directory: ")
+src: str = src.replace('"', '') 
+src: str = src.replace("'", "")
 ValidateDirectory(src)
 
 dst: str = input("Please enter the destination directory: ")
+dst: str = dst.replace('"', '')
+dst: str = dst.replace("'", "")
 ValidateDirectory(dst)
 
 ChooseOperation(src, dst)
