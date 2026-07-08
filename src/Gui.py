@@ -1,16 +1,41 @@
+from turtledemo.nim import COLOR
+
 import Main
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+import customtkinter as ctk
+try:
+    from ctypes import windll, byref,sizeof, c_int
+except:
+    pass
 
-class App():
-
+class App(ctk.CTk):
     def __init__(self, root):
-        self.root = root
-        self.root.title("Copypasta")
-        self.Ui(root)
-        root.minsize(root.winfo_width(), root.winfo_height())
-        self.root.mainloop()
-    
+        # window setup
+        super().__init__(fg_color='#bb99cc')
+        self.title("Copypasta")
+        self.geometry('520x94')
+        self.resizable(False, False)
+        self.change_title_bar_color()
+        self.Ui(self)
+
+        # layout
+        self.columnconfigure(0, weight=1, uniform = 'a')
+        self.rowconfigure((0,1,2), weight = 1, uniform = 'a')
+
+        self.mainloop()
+
+    # Changes the color of the title bar ON WINDOWS ONLY!!!
+    def change_title_bar_color(self):
+        try:
+            Hwnd = windll.user32.GetParent(self.winfo_id())
+            DWMWA_ATTRIBUTE = 35
+            COLOR = 0x00cc99bb
+            windll.dwmapi.DwmSetWindowAttribute(Hwnd, DWMWA_ATTRIBUTE, byref(c_int(COLOR)), sizeof(c_int))
+        except:
+            pass
+
+#______________________________________________________MAHHAN CODE________________________________________________________________________________________________________________________________________
     def Ui(self, root):
         selected = tk.StringVar()
         radioBtnCopy = tk.Radiobutton(text='Copy', value=1, variable=selected).grid(row=0,column=10, sticky='w')
@@ -39,7 +64,7 @@ class App():
         btnStart.grid(row=6, column=20, sticky='w')
 
         transferMethods: list[str] = ["Skip", "Overwrite", "Merge", "Ask Each Time"]
-        chooseTransferMethod = ttk.Combobox(root, values=transferMethods)
+        chooseTransferMethod = ttk.Combobox(root, values=transferMethods, state="readonly")
         chooseTransferMethod.set("Select transfer method.")
         chooseTransferMethod.grid(row=7, column=10, padx=0, sticky='nsew')
 
@@ -64,8 +89,8 @@ class App():
     # Copy/Move operation 
     def OperationToggle(self):
         pass
-    
+
 def Launch():
-    root = tk.Tk()
+    root = ctk.CTk()
     app = App(root)
     app = app.__init__(root)
