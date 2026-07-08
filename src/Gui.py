@@ -13,8 +13,8 @@ class App():
     
     def Ui(self, root):
         selected = tk.StringVar()
-        radioBtnCopy = tk.Radiobutton(text='Copy', value=1, variable=selected).grid(row=0,column=10, sticky='w')
-        radioBtnMove = tk.Radiobutton(text='Move', value=2, variable=selected).grid(row=0,column=10, sticky='e')
+        radioBtnCopy = tk.Radiobutton(text='Copy', value=1, variable=selected).grid(row=0,column=9, sticky='e')
+        radioBtnMove = tk.Radiobutton(text='Move', value=2, variable=selected).grid(row=0,column=11, sticky='w')
         
         srcLabel = tk.Label(root, text="Path to source:", font=("IBM Plex Mono", 12))
         srcLabel.grid(row=1,column=0, sticky='w')
@@ -38,10 +38,15 @@ class App():
         btnStart = tk.Button(root, height=2, width=5, padx=2, text="START", font=("IBM Plex Mono", 8))
         btnStart.grid(row=6, column=20, sticky='w')
 
+        validationOptions: list[str] = ["No Validation", "Shallow Validation", "Byte-By-Byte Validation"]
+        chooseValidationMethod = ttk.Combobox(root, values=validationOptions, state="readonly")
+        chooseValidationMethod.set("Select Validation Method")
+        chooseValidationMethod.grid(row=7, column=9, padx=0, sticky='w')
+
         transferMethods: list[str] = ["Skip", "Overwrite", "Merge", "Ask Each Time"]
-        chooseTransferMethod = ttk.Combobox(root, values=transferMethods)
-        chooseTransferMethod.set("Select transfer method.")
-        chooseTransferMethod.grid(row=7, column=10, padx=0, sticky='nsew')
+        chooseTransferMethod = ttk.Combobox(root, values=transferMethods, state="readonly")
+        chooseTransferMethod.set("Select Transfer Method")
+        chooseTransferMethod.grid(row=7, column=11, padx=0, sticky='e')
 
     # Function for opening file explorer to select folder/drive for file transfer
     def BrowseDir(self):
