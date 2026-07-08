@@ -31,14 +31,14 @@ class App():
 
         btnDstDir = tk.Button(root, text="DST", font=("IBM Plex Mono", 8), command=self.BrowseDir)
         btnDstDir.grid(row=2, column=20)
-
+        
         btnExit = tk.Button(root, height=2, width=5, padx=2, text="EXIT", font=("IBM Plex Mono", 8))
         btnExit.grid(row=6, column=0, sticky='w')
 
         btnStart = tk.Button(root, height=2, width=5, padx=2, text="START", font=("IBM Plex Mono", 8))
         btnStart.grid(row=6, column=20, sticky='w')
 
-        transferMethods = ["Skip", "Overwrite", "Merge", "Ask Each Time"]
+        transferMethods: list[str] = ["Skip", "Overwrite", "Merge", "Ask Each Time"]
         chooseTransferMethod = ttk.Combobox(root, values=transferMethods)
         chooseTransferMethod.set("Select transfer method.")
         chooseTransferMethod.grid(row=7, column=10, padx=0, sticky='nsew')
