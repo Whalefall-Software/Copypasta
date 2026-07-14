@@ -2,19 +2,27 @@ import os
 import shutil
 import filecmp
 import click
-import Gui
 
-Gui.Launch()
-
-def ValidateDirectory(userDirectoryPath):
+def isValidDir(userDirectoryPath):
     try:
         while os.path.isdir(userDirectoryPath) == False:
-            userDirectoryPath = input("Please enter a valid directory: ")
+            return False
         if os.path.isdir(userDirectoryPath) == True:
-            print(f"{userDirectoryPath} is a valid directory!")
-            totalBytes = GetSizeOfDirectory(userDirectoryPath)
+            return True
     except Exception as e:
-        print(f"Error: {e} unexpected error occurred.")
+        return e
+    
+def ValidateDirectory(userDirectoryPath):
+    try:
+        isValidDir: bool = os.path.isdir(userDirectoryPath)
+        while isValidDir == False:
+            return isValidDir
+        if isValidDir == True:
+            totalBytes = GetSizeOfDirectory(userDirectoryPath)
+            return isValidDir
+    except Exception as e:
+        validateDirMessage: str = f"Error: {e} unexpected error occurred."
+        return validateDirMessage
 
 def CopyDirectory(source, destination):
     try:
@@ -39,12 +47,15 @@ def CopyDirectory(source, destination):
                     bar.update(fileSize)
 
     except Exception as e:
-        print(f"Error copying directory {source}: {e}")
+        copyDirMessage: str = f"Error copying directory {source}: {e}"
+        return copyDirMessage
     else:
-        print(f"Copying directory {source} to {destination} was successful.")
+        copyDirMessage: str = f"Copying directory {source} to {destination} was successful."
+        return copyDirMessage
 
 def MoveDirectory(source, destination):
     try:
+        copyFailed: bool = False 
         totalSize = GetSizeOfDirectory(source)
         with click.progressbar(length=totalSize) as bar:
 
@@ -67,7 +78,8 @@ def MoveDirectory(source, destination):
 
         if not ValidateOperation(source, destination, False):
             print("Copy failed...")
-            return
+            copyFailed = True
+            return copyFailed 
 
         print("Cleaning up...")
 
@@ -110,25 +122,3 @@ def GetSizeOfDirectory(directory):
 
     return totalSize
    
-def ChooseOperation(sourceDirectory, destinationDirectory):
-    operationState = ""
-    operationState = input("Enter the function you want to do.\n(C)opy, (M)ove, (V)alidate, or (B)yte-by-byte validation: ")
-    match operationState.lower():
-        case 'c': 
-            CopyDirectory(sourceDirectory, destinationDirectory)
-        case 'm':
-            MoveDirectory(sourceDirectory, destinationDirectory)
-        case 'v':
-            ValidateOperation(sourceDirectory, destinationDirectory, False)
-        case 'b':
-            ValidateOperation(sourceDirectory, destinationDirectory, True)
-        case _:
-            print("Error: Invalid input given!")
-
-src: str = input("Please enter the source directory: ")
-ValidateDirectory(src)
-
-dst: str = input("Please enter the destination directory: ")
-ValidateDirectory(dst)
-
-ChooseOperation(src, dst)
