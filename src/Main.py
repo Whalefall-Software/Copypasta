@@ -41,46 +41,21 @@ def CopyDirectory(source, destination):
         print(f"Copying directory {source} to {destination} was successful.")
 
 def MoveDirectory(source, destination):
+    CopyDirectory(source, destination)
     try:
-        totalSize = GetSizeOfDirectory(source)
-        with click.progressbar(length=totalSize) as bar:
-
-            for dirPath, dirName, files in os.walk(source):
-
-                relativePath = os.path.relpath(dirPath, source)
-                targetPath = os.path.join(destination, relativePath)
-
-                os.makedirs(targetPath, exist_ok=True)
-
-                for file in files:
-
-                    sourceFile = os.path.join(dirPath, file)
-                    targetFile = os.path.join(targetPath, file)
-
-                    shutil.copy2(sourceFile, targetFile)
-
-                    fileSize = os.path.getsize(sourceFile)
-                    bar.update(fileSize)
-
-        if not ValidateOperation(source, destination, False):
-            print("Copy failed...")
-            return
-
-        print("Cleaning up...")
-
         files = os.listdir(source)
         for file in files:
             filePath = os.path.join(source, file)
-            if os.path.join(filePath):
+            if os.path.isfile(filePath) or os.path.islink(filePath):
                 os.remove(filePath)
             elif os.path.isdir(filePath):
                 shutil.rmtree(filePath)
-            
+
     except Exception as e:
-        print(f"Error moving directory {source}: {e}")
+        print(f"Error emptying directory {source}: {e}")
     else:
-        print(f"Moving directory {source} to {destination} was successful.")
-        
+        print(f"Emptying of directory {source} was successful!")
+    
 def ValidateOperation(source, destination, depth):
     filecmp.clear_cache() # Used to eliminate cached comparison results that can give inaccurate results
     try:
