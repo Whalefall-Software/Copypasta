@@ -64,5 +64,4 @@ jobs:
             files: |
               Main.exe
               Main.bin
-              Main.app
-              
+              Main.app      
