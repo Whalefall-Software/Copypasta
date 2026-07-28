@@ -51,31 +51,15 @@ jobs:
 
         - name: List downloaded files (Debugging)
           run: ls -R
-
-        # - name: Make files executable Linux
-        #   if: runner.os == 'Linux'
-        #   run: chmod +x Copypasta-* || true
-        # - name: Make files exe for Mac
-        #   if: runner.os == 'macOS'
-        #   run: chmod +x Copypasta-* || true
-
-        - name: Generate changelog
-          id: changelog
-          uses: TriPSs/conventional-changelog-action@v6
-          with:
-            github-token: ${{ secrets.GITHUB_TOKEN }}
-            output-file: "false"
-            skip-version-file: true
-            skip-commit: true
-            skip-tag: true
         - name: Create GitHub Release
-          uses: softprops/action-gh-release@v3
+          uses: "marvinpinto/action-automatic-releases@latest"
           with:
-           tag_name: ${{ github.ref_name }}
-           name: Release ${{ github.ref_name }}
-           draft: false
-           prerelease: false
-           files: |
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            automatic_release_tag: "latest"
+            title: "Release"
+            draft: false
+            prerelease: false
+            files: |
               Main.exe
               Main.bin
               Main.app
