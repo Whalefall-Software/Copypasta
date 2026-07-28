@@ -59,16 +59,20 @@ jobs:
         - name: List downloaded files (Debugging)
           run: ls -R
 
-        - name: Make files executable (Linux/Mac)
+        - name: Make files executable Linux
+          if: runner.os == 'Linux'
+          run: chmod +x Copypasta-* || true
+        - name: Make files exe for Mac
+          if: runner.os == 'macOS'
           run: chmod +x Copypasta-* || true
         - name: Create GitHub Release
           uses: softprops/action-gh-release@v2
           with:
-            tag_name: ${{ github.ref_name }}
-            name: Release ${{ github.ref_name }}
-            draft: false
-            prerelease: false
-            files: |
+           tag_name: ${{ github.ref_name }}
+           name: Release ${{ github.ref_name }}
+           draft: false
+           prerelease: false
+           files: |
               Copypasta-Linux.bin
               Copypasta-Windows.bin
               Copypasta-MacOS.bin
