@@ -43,6 +43,8 @@ jobs:
               include-hidden-files: true
 
     release:
+        permissions: 
+            contents: write
         needs: build
         runs-on: ubuntu-latest
         steps:
@@ -63,5 +65,4 @@ jobs:
               Main.exe
               Main.bin
               Main.app
-          env: 
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              
