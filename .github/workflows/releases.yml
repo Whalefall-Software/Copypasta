@@ -30,24 +30,17 @@ jobs:
         - uses: Nuitka/Nuitka-Action@main
           with:
             nuitka-version: main
-            script-name: src/Main.py
-
-        - name: Rename bin
-          run: |
-            if [[ "$RUNNER_OS" == "Windows" ]]; then
-                mv src/Main.dist/Main.bin src/Main.dist/Copypasta-Windows.bin
-            elif [[ "$RUNNER_OS" == "Linux" ]]; then
-                mv src/Main.dist/Main.bin src/Main.dist/Copypasta-Linux.bin
-            elif [[ "$RUNNER_OS" == "macOS" ]]; then
-                mv src/Main.dist/Main.bin src/Main.dist/Copypasta-MacOS.bin
-            fi
-          shell: bash
-
+            script-name: Main.py
         - name: Upload artifact
           uses: actions/upload-artifact@v4
           with:
-              name: Copypasta-${{ matrix.os }}
-              path: Main.dist/*
+              name: ${{ runner.os }} Build
+              path: |
+                build/*.exe
+                build/*.bin
+                build/*.app/**/*
+                build/*.dist/**/*
+              include-hidden-files: true
 
     release:
         needs: build
@@ -59,22 +52,32 @@ jobs:
         - name: List downloaded files (Debugging)
           run: ls -R
 
-        - name: Make files executable Linux
-          if: runner.os == 'Linux'
-          run: chmod +x Copypasta-* || true
-        - name: Make files exe for Mac
-          if: runner.os == 'macOS'
-          run: chmod +x Copypasta-* || true
+        # - name: Make files executable Linux
+        #   if: runner.os == 'Linux'
+        #   run: chmod +x Copypasta-* || true
+        # - name: Make files exe for Mac
+        #   if: runner.os == 'macOS'
+        #   run: chmod +x Copypasta-* || true
+
+        - name: Generate changelog
+          id: changelog
+          uses: TriPSs/conventional-changelog-action@v6
+          with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            output-file: "false"
+            skip-version-file: true
+            skip-commit: true
+            skip-tag: true
         - name: Create GitHub Release
-          uses: softprops/action-gh-release@v2
+          uses: softprops/action-gh-release@v3
           with:
            tag_name: ${{ github.ref_name }}
            name: Release ${{ github.ref_name }}
            draft: false
            prerelease: false
            files: |
-              Copypasta-Linux.bin
-              Copypasta-Windows.bin
-              Copypasta-MacOS.bin
+              Main.exe
+              Main.bin
+              Main.app
           env: 
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
