@@ -35,11 +35,11 @@ jobs:
         - name: Rename bin
           run: |
             if [[ "$RUNNER_OS" == "Windows" ]]; then
-                mv Main.dist/Main.bin Main.dist/Copypasta-Windows.bin
+                mv src/Main.dist/Main.bin src/Main.dist/Copypasta-Windows.bin
             elif [[ "$RUNNER_OS" == "Linux" ]]; then
-                mv Main.dist/Main.bin Main.dist/Copypasta-Linux.bin
+                mv src/Main.dist/Main.bin src/Main.dist/Copypasta-Linux.bin
             elif [[ "$RUNNER_OS" == "macOS" ]]; then
-                mv Main.dist/Main.bin Main.dist/Copypasta-MacOS.bin
+                mv src/Main.dist/Main.bin src/Main.dist/Copypasta-MacOS.bin
             fi
           shell: bash
 
