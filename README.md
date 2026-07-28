@@ -7,8 +7,9 @@ To manually install the latest development branch of the project you can clone t
 
 1. Open terminal and copy: `git clone https://github.com/Whalefall-Software/Copypasta.git`
 2. Move into repo: `cd Copypasta`
-3. Move into src: `cd src`
-4. Install click module: `pip install click`
+3. Create Python venv to avoid package conflict issues
+3. Install all modules using `pip install -r requirements`
+4. Move into src: `cd src`
 5. Run Python code from either terminal or running it with an IDE: `python Main.py`
 
 
