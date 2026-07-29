@@ -35,7 +35,7 @@ jobs:
           with:
             nuitka-version: main
             script-name: src/Main.py
-            onefile: true
+            mode: standalone
           
         - name: Check build file
           run: |
