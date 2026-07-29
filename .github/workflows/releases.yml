@@ -10,7 +10,7 @@ jobs:
     build:
         strategy: 
             matrix:
-                os: [ubuntu-latest, macOS-latest, windows-latest]
+                os: [ubuntu-latest] #macOS-latest, windows-latest]
 
         runs-on: ${{ matrix.os }}
 
@@ -23,6 +23,7 @@ jobs:
         - name: install linux dependencies
           if: runner.os == 'Linux'
           run: |
+           sudo apt-get update
            sudo apt-get install -y patchelf
       
         - run: python -m pip install --upgrade pip
@@ -31,37 +32,32 @@ jobs:
           with:
             nuitka-version: main
             script-name: src/Main.py
+            mode: standalone
         - name: Upload artifact
           uses: actions/upload-artifact@v4
+          continue-on-error: true
+          
           with:
-              name: ${{ runner.os }} Build
+              name: Build-${{ runner.os }} 
               path: |
                 build/*.exe
                 build/*.bin
                 build/*.app/**/*
                 build/*.dist/**/*
-              include-hidden-files: true
-
+      
     release:
         permissions: 
             contents: write
         needs: build
         runs-on: ubuntu-latest
         steps:
-        - name: Checkout repository
-          uses: actions/checkout@v4
-
-        - name: List downloaded files (Debugging)
-          run: ls -R
-        - name: Create GitHub Release
-          uses: "marvinpinto/action-automatic-releases@latest"
+        - name: Download Artifacts
+          uses: actions/download-artifact@v4
+        - name: Create Github Release
+          uses: softprops/action-gh-release@v2
           with:
-            repo_token: ${{ secrets.GITHUB_TOKEN }}
-            automatic_release_tag: "latest"
-            title: "Release"
-            draft: false
-            prerelease: false
-            files: |
-              Main.exe
-              Main.bin
-              Main.app      
+            files: Build-${{ runner.os }}
+            tag_name: ${{ github.ref_name }}
+            body: "Automated release of ${{ github.ref_name }}"
+          env: 
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
