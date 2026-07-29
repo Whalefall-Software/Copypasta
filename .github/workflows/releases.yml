@@ -5,7 +5,6 @@ on:
             - main
         types:
             - closed
-
 jobs:
     build:
         strategy: 
@@ -34,7 +33,7 @@ jobs:
         - name: Upload artifact
           uses: actions/upload-artifact@v4
           with:
-              name: ${{ runner.os }} Build
+              name: Build-${{ runner.os }}
               path: |
                 build/*.exe
                 build/*.bin
@@ -51,8 +50,6 @@ jobs:
         - name: Checkout repository
           uses: actions/checkout@v4
 
-        - name: List downloaded files (Debugging)
-          run: ls -R
         - name: Create GitHub Release
           uses: "marvinpinto/action-automatic-releases@latest"
           with:
@@ -62,6 +59,6 @@ jobs:
             draft: false
             prerelease: false
             files: |
-              Main.exe
-              Main.bin
-              Main.app      
+              Build-Windows.*
+              Build-macOS.*
+              Build-Linux.*      
