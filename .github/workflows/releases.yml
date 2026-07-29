@@ -57,8 +57,6 @@ jobs:
             automatic_release_tag: "latest"
             title: "Release"
             draft: false
-            prerelease: false
+            prerelease: false  
             files: |
-              Build-Windows.*
-              Build-macOS.*
-              Build-Linux.*      
+                path:
