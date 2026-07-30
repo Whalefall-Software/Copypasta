@@ -20,8 +20,8 @@ jobs:
               - os-name: windows-x86_64
                 runs-on: windows-latest
 
-              - os-name: macOS-x86_64
-                runs-on: macOS-15-intel
+              # - os-name: macOS-x86_64
+              #   runs-on: macOS-15-intel
                   
               - os-name: macOS-aarch64
                 runs-on: macOS-latest
