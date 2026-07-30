@@ -6,8 +6,7 @@ on:
       - 'v*'
     branches: 
       - main
-      
-
+    
 jobs:
     Build:
       name: Build ${{ matrix.platform.os-name }}
@@ -21,11 +20,11 @@ jobs:
               - os-name: windows-x86_64
                 runs-on: windows-latest
 
-              # - os-name: macOS-x86_64
-              #   runs-on: macOS-15-intel
+              - os-name: macOS-x86_64
+                runs-on: macOS-15-intel
                   
-              # - os-name: macOS-aarch64
-              #   runs-on: macOS-latest
+              - os-name: macOS-aarch64
+                runs-on: macOS-latest
 
       steps:
         - name: Check Code
@@ -50,36 +49,62 @@ jobs:
               python -m pip install --upgrade pip
               pip install -r requirements.txt
 
-        - name: Nuitka Installation and Building
-          uses: Nuitka/Nuitka-Action@main
-          with:
-            nuitka-version: main
-            script-name: src/Main.py
-            mode: app
+        - name: Nuitka Installation and Building Linux x64
+          if: matrix.platform.runs-on == 'ubuntu-latest'
+          run: | 
+            ls
+            python -m nuitka --onefile Main.py
+          shell: bash
+        
+        - name: Nuitka Installation and Building MacOS ARM64
+          if: matrix.platform.runs-on == 'macOS-latest'
+          run: |
+            ls
+            python -m nuitka --standalone --macos-create-app-bundle src/Main.py
+          shell: bash
+
+        - name: Nuitka Installation and Building MacOS x64
+          if: matrix.platform.runs-on == 'macOS-15-intel'
+          run: |
+            ls
+            python -m nuitka --standalone --macos-create-app-bundle src/Main.py
+          shell: bash
+
+        - name: Nuitka Installation and Building Windows x64
+          if: matrix.platform.runs-on == 'windows-latest'
+          run: |
+            dir
+            python -m nuitka --onefile src/Main.py
+          shell: powershell
 
         - name: Create Artifacts Directory
           run: |
             mkdir -p ./artifacts/
-          
+
         - name: Prep Windows Artifact
           if: matrix.platform.runs-on == 'windows-latest'
           run: |
+            dir
             copy build/*.exe .\artifacts\
-        
+          shell: powershell
+          
         - name: Prep Unix Artifact
           if:  matrix.platform.runs-on == 'linux-latest'
           run: |
+            ls
             cp build/*.bin ./artifacts/
 
         - name: Prep MacOS ARM Artifact
           if: matrix.platform.runs-on == 'macOS-latest'
           run: |
-            cp Main.dist/Main.bin ./artifacts/
+            ls
+            cp Main.app ./artifacts/
 
         - name: Prep MacOS Intel Artifact
           if: matrix.platform.runs-on == 'macOS-15-intel'
           run: |
-            cp Main.dist/Main.bin ./artifacts/
+            ls
+            cp Main.app ./artifacts/
           
 
         - name: Upload Build Artifacts
@@ -112,10 +137,11 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
             name: Main Build and Release
-            tag_name: ${{ github.ref }}
+            tag_name: ${{ github.ref_name }}
             draft: false
             prerelease: false
             files: |
-              ./artifacts/*.bin
+              ./artifacts/*.app
               ./artifacts/*.exe
+              ./artifacts/*.bin
           
