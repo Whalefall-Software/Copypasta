@@ -6,6 +6,7 @@ on:
       - 'v*'
     branches: 
       - main
+      
 
 jobs:
     Build:
@@ -20,11 +21,11 @@ jobs:
               - os-name: windows-x86_64
                 runs-on: windows-latest
 
-              # - os-name: macOS-x86_64
-              #   runs-on: macOS-15-intel
+              - os-name: macOS-x86_64
+                runs-on: macOS-15-intel
                   
-              # - os-name: macOS-aarch64
-              #   runs-on: macOS-latest
+              - os-name: macOS-aarch64
+                runs-on: macOS-latest
 
       steps:
         - name: Check Code
@@ -73,12 +74,12 @@ jobs:
         - name: Prep MacOS ARM Artifact
           if: matrix.platform.runs-on == 'macOS-latest'
           run: |
-            cp Main.bin ./artifacts/
+            cp Main.dist/Main.bin ./artifacts/
 
         - name: Prep MacOS Intel Artifact
           if: matrix.platform.runs-on == 'macOS-15-intel'
           run: |
-            cp Main.bin ./artifacts/
+            cp Main.dist/Main.bin ./artifacts/
           
 
         - name: Upload Build Artifacts
@@ -91,6 +92,8 @@ jobs:
       name: Create Release with Auto-Version
       needs: Build
       runs-on: ubuntu-latest
+      permissions: 
+        contents: write
 
       steps: 
         - name: Check Code
@@ -104,12 +107,15 @@ jobs:
               merge-multiple: true
 
         - name: Create GitHub Release
-          uses: actions/create-release@latest
+          uses: softprops/action-gh-release@v2
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
-            release_name: Main Build and Release
+            name: Main Build and Release
             tag_name: ${{ github.ref }}
             draft: false
             prerelease: false
+            files: |
+              ./artifacts/*.bin
+              ./artifacts/*.exe
           
