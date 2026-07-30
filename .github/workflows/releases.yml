@@ -148,5 +148,11 @@ jobs:
             draft: false
             prerelease: false
             files: |
-              ./artifacts/
+              ls
+              ./artifacts/Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.exe
+              ./artifacts/Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.bin
+              ./artifacts/Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app
+              ./artifacts/Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app
+
+              
           
