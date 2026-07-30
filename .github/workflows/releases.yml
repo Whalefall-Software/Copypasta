@@ -86,8 +86,8 @@ jobs:
           if: matrix.platform.runs-on == 'windows-latest'
           run: |
             dir
-            mv build/*.exe Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.exe
-            copy build/*.exe .\artifacts\
+            mv build\*.exe Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.exe
+            copy build\*.exe .\artifacts\
           shell: powershell
 
         - name: Prep Linux Artifact
@@ -95,7 +95,7 @@ jobs:
           run: |
             ls
             mv Main.bin Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.bin
-            cp Main.bin ./artifacts/
+            cp *.bin ./artifacts/
           shell: bash
 
         - name: Prep MacOS ARM Artifact
@@ -111,7 +111,7 @@ jobs:
           run: |
             ls
             mv Main.app Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app
-            cp -R mv Main.app Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app ./artifacts/
+            cp -R Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app ./artifacts/
           shell: bash
 
         - name: Upload Build Artifacts
