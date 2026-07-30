@@ -1,71 +1,172 @@
+name: "[main] Build and Release"
 
 on: 
-    pull_request:
+    push:
         branches: 
             - main
-        types:
-            - closed
+
 jobs:
-    build:
-        strategy: 
-            matrix:
-                 os: [ubuntu-latest, macOS-latest, windows-latest]
+    Build:
+      name: Build ${{ matrix.platform.os-name }}
+      runs-on: ${{ matrix.platform.runs-on }}
+      strategy: 
+          matrix:
+            platform:
+              - os-name: linux-x86_64
+                runs-on: ubuntu-latest
 
-        runs-on: ${{ matrix.os }}
+              - os-name: windows-x86_64
+                runs-on: windows-latest
 
-        steps:
+              - os-name: macOS-x86_64
+                runs-on: macOS-15-intel
+                  
+              - os-name: macOS-aarch64
+                runs-on: macOS-latest
 
-        - uses: actions/checkout@v7
-        - uses: actions/setup-python@v7
-          with:
-           python-version: '3.14.6' 
-           cache: 'pip'
-           cache-dependency-path: |
+      steps:
+        - name: Check Code
+          uses: actions/checkout@v4
+
+        - name: Verify GitHub CLI (gh)
+          if: matrix.platform.runs-on != 'windows-latest'
+          run: |
+            if ! command -v gh &> /dev/null; then
+              echo "GitHub CLI (gh) is not available on this runner"
+              exit 1
+            fi
+            gh --version
+
+        - name: Verify GitHub CLI (gh) on Windows
+          if: matrix.platform.runs-on == 'windows-latest'
+          run: |
+            gh --version
+
+        - name: Get next version (Unix)
+          if: matrix.platform.runs-on != 'windows-latest'
+          id: get_version
+          run: |
+            latest_tag=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo "v0.0.0")
+            echo "Latest tag: $latest_tag"
+
+            version=${latest_tag#v}
+            major=$(echo $version | cut -d. -f1)
+            minor=$(echo $version | cut -d. -f2)
+            patch=$(echo $version | cut -d. -f3)
+
+            patch=$((patch + 1))
+            new_version="v$major.$minor.$patch"
+
+            echo "New version: $new_version"
+            echo "new_tag=$new_version" >> "$GITHUB_OUTPUT"
+            echo "version_tag=$new_version" >> "$GITHUB_OUTPUT"
+
+        - name: Get next version (Windows)
+          if: matrix.platform.runs-on == 'windows-latest'
+          id: get_version_win
+          run: |
+            $latest_tag = (gh release list --limit 1 --json tagName | ConvertFrom-Json | Select-Object -First 1).tagName
+            if (-not $latest_tag) { $latest_tag = "v0.0.0" }
+            Write-Host "Latest tag: $latest_tag"
+
+            $version = $latest_tag -replace '^v', ''
+            $parts = $version -split '\.'
+            $major = [int]$parts[0]
+            $minor = [int]$parts[1]
+            $patch = [int]$parts[2]
+
+            $patch = $patch + 1
+            $new_version = "v$major.$minor.$patch"
+
+            Write-Host "New version: $new_version"
+            Write-Output "new_tag=$new_version" >> $env:GITHUB_OUTPUT
+            Write-Output "version_tag=$new_version" >> $env:GITHUB_OUTPUT
+
+        - name: Setup Python
+          uses: actions/setup-python@v5
+          with:              
+            python-version: '3.11' 
+            cache: 'pip'
+            cache-dependency-path: |
               **/requirements*.txt
 
         - name: install linux dependencies
-          if: runner.os == 'Linux'
+          if: matrix.platform.runs-on == 'ubuntu-latest'
           run: |
-           sudo apt-get update
-           sudo apt-get install -y patchelf
-      
-        - run: python -m pip install --upgrade pip
-        - run: pip install -r requirements.txt
-        - uses: Nuitka/Nuitka-Action@main
+              sudo apt-get update
+              sudo apt-get install -y patchelf
+
+        - name: install python dependencies
+          run: | 
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+
+        - name: Nuitka Installation and Building
+          uses: Nuitka/Nuitka-Action@main
           with:
             nuitka-version: main
             script-name: src/Main.py
             mode: app
 
+        - name: create artifacts directory
+          run: |
+            mkdir -p ./artifacts/
+          
+        - name: Prep Windows artifact
+          if: matrix.platform.runs-on == 'windows-latest'
+          run: |
+            copy build/*.exe .\artifacts\
 
-        - name: Upload artifact
+        - name: Upload Build Artifacts
           uses: actions/upload-artifact@v4
-          with:
-              name: ${{ runner.os }} Build
-                
-              path: |
-                build/*.exe
-                build/*.bin
-                build/*.app/**/*
-                build/*.dist/**/*
-              
-              if-no-files-found: error
+          with: 
+            name: ${{ matrix.platform.os-name }}-${{ matrix.platform.runs-on != 'windows-latest' && steps.get_version.outputs.new_tag || steps.get_version_win.outputs.new_tag }}
+            path: ./artifacts/
 
-    release:
-        permissions: 
-            contents: write
-        needs: build
-        runs-on: ubuntu-latest
-        steps:
+    Release:
+      name: Create Release with Auto-Version
+      needs: Build
+      runs-on: ubuntu-latest
+
+      steps: 
+        - name: Check Code
+          uses: actions/checkout@v4
         
-        - name: Download Artifacts
-          uses: actions/download-artifact@v4
+        - name: Calculate Next Release Version
+          id: get_tag
+          run: |
+            latest_tag=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo "v0.0.0")
+            echo "Latest tag: $latest_tag"
+          
+            version=${latest_tag#v}
+            major=$(echo $version | cut -d. -f1)
+            minor=$(echo $version | cut -d. -f2)
+            patch=$(echo $version | cut -d. -f3)
+          
+            patch=$((patch + 1))
+            new_version="v$major.$minor.$patch"
 
-        - name: Create Github Release
-          uses: softprops/action-gh-release@v2
+            echo "New version: $new_version"
+            echo "new_tag=$new_version" >> "$GITHUB_OUTPUT"
+
+        - name: Download All Artifacts
+          uses: actions/download-artifact@v4
           with:
-            files: actions/download-artifact@v4
-            tag_name: ${{ github.ref_name }}
-            body: "Automated release of ${{ github.ref_name }}"
-          env: 
+              path: ./artifacts/
+              pattern: "*"
+              merge-multiple: true
+
+        - name: Create GitHub Release
+          env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            echo "Artifacts to be included in release:"
+            find ./artifacts -type f -name "*" | while read file; do
+              echo "- $(basename "$file")"
+            done
+
+            gh release create "${{ steps.get_tag.outputs.new_tag }}" \
+              --title "Release ${{ steps.get_tag.outputs.new_tag }}" \
+              --generate-notes \
+              --latest \
+              ./artifacts/*
