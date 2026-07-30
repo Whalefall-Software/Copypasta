@@ -66,10 +66,19 @@ jobs:
             copy build/*.exe .\artifacts\
         
         - name: Prep Unix Artifact
-          if:  matrix.platform.runs-on != 'windows-latest'
+          if:  matrix.platform.runs-on == 'linux-latest'
           run: |
             cp build/*.bin ./artifacts/
-            cp build/*.app ./artifacts/
+
+        - name: Prep MacOS ARM Artifact
+          if: matrix.platform.runs-on == 'macOS-latest'
+          run: |
+            cp Main.bin ./artifacts/
+
+        - name: Prep MacOS Intel Artifact
+          if: matrix.platform.runs-on == 'macOS-15-intel'
+          run: |
+            cp Main.bin ./artifacts/
           
 
         - name: Upload Build Artifacts
@@ -104,18 +113,3 @@ jobs:
             draft: false
             prerelease: false
           
-
-        - name: Create GitHub Release
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: |
-            echo "Artifacts to be included in release:"
-            find ./artifacts -type f -name "*" | while read file; do
-              echo "- $(basename "$file")"
-            done
-
-            gh release create "${{ steps.get_tag.outputs.new_tag }}" \
-              --title "Release ${{ steps.get_tag.outputs.new_tag }}" \
-              --generate-notes \
-              --latest \
-              ./artifacts/*
