@@ -9,7 +9,7 @@ jobs:
     build:
         strategy: 
             matrix:
-                 os: [ubuntu-latest] #, macOS-latest, windows-latest]
+                 os: [ubuntu-latest, macOS-latest, windows-latest]
 
         runs-on: ${{ matrix.os }}
 
@@ -36,8 +36,6 @@ jobs:
             nuitka-version: main
             script-name: src/Main.py
             mode: app
-            nuitka-options: |
-              --output-filename=Copypasta-${{ runner.os }}
 
 
         - name: Upload artifact
