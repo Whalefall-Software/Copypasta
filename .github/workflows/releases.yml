@@ -148,7 +148,5 @@ jobs:
             draft: false
             prerelease: false
             files: |
-              ./artifacts/*.zip
-              ./artifacts/*.exe
-              ./artifacts/*.bin
+              ./artifacts/
           
