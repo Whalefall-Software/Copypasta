@@ -98,13 +98,13 @@ jobs:
           if: matrix.platform.runs-on == 'macOS-latest'
           run: |
             ls
-            cp Main.app ./artifacts/
+            cp -R Main.app ./artifacts/
 
         - name: Prep MacOS Intel Artifact
           if: matrix.platform.runs-on == 'macOS-15-intel'
           run: |
             ls
-            cp Main.app ./artifacts/
+            cp -R Main.app ./artifacts/
           
 
         - name: Upload Build Artifacts
