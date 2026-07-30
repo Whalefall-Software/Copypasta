@@ -91,18 +91,18 @@ jobs:
           shell: powershell
 
         - name: Prep Linux Artifact
-          if:  matrix.platform.runs-on == 'linux-latest'
+          if:  matrix.platform.runs-on == 'ubuntu-latest'
           run: |
             ls
-            mv *.bin Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.bin
-            cp *.bin ./artifacts/
+            mv Main.bin Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.bin
+            cp Main.bin ./artifacts/
           shell: bash
 
         - name: Prep MacOS ARM Artifact
           if: matrix.platform.runs-on == 'macOS-latest'
           run: |
             ls
-            mv *.app Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app
+            mv Main.app Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app
             cp -R Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app ./artifacts/
           shell: bash
 
@@ -110,8 +110,8 @@ jobs:
           if: matrix.platform.runs-on == 'macOS-15-intel'
           run: |
             ls
-            mv *.app Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app
-            cp -R mv *.app Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app ./artifacts/
+            mv Main.app Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app
+            cp -R mv Main.app Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app ./artifacts/
           shell: bash
 
         - name: Upload Build Artifacts
