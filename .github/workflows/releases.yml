@@ -1,71 +1,107 @@
+name: "[main] Build and Release"
 
 on: 
-    pull_request:
-        branches: 
-            - main
-        types:
-            - closed
+  push:
+    tags:
+      - 'v*'
+    branches: 
+      - main
 
 jobs:
-    build:
-        strategy: 
-            matrix:
-                os: [ubuntu-latest, macos-latest, windows-latest]
+    Build:
+      name: Build ${{ matrix.platform.os-name }}
+      runs-on: ${{ matrix.platform.runs-on }}
+      strategy: 
+          matrix:
+            platform:
+              - os-name: linux-x86_64
+                runs-on: ubuntu-latest
 
-        runs-on: ${{ matrix.os }}
+              - os-name: windows-x86_64
+                runs-on: windows-latest
 
-        steps:
-        - uses: actions/checkout@v7
-        - uses: actions/setup-python@v7
-          with:
-           python-version: '3.14-dev' 
-           cache: 'pip'
-        - run: sudo apt-get update
-        - run: sudo apt-get upgrade
-        - run: sudo apt-get install -y patchelf
-        - run: python -m pip install --upgrade pip
-        - run: pip install -r requirements.txt
-        - run: python -m nuitka --standalone src/Main.py
+              - os-name: macOS-x86_64
+                runs-on: macOS-15-intel
+                  
+              - os-name: macOS-aarch64
+                runs-on: macOS-latest
 
-        - name: Rename bin
-          run: |
-            if [[ "$RUNNER_OS" == "Windows" ]]; then
-                mv Main.dist/Main.bin Main.dist/Copypasta-Windows.bin
-            elif [[ "$RUNNER_OS" == "Linux" ]]; then
-                mv Main.dist/Main.bin Main.dist/Copypasta-Linux.bin
-            elif [[ "$RUNNER_OS" == "macOS" ]]; then
-                mv Main.dist/Main.bin Main.dist/Copypasta-MacOS.bin
-            fi
-          shell: bash
-
-        - name: Upload artifact
-          uses: actions/upload-artifact@v4
-          with:
-              name: Copypasta-${{ matrix.os }}
-              path: Main.dist/*
-
-    release:
-        needs: build
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout repository
+      steps:
+        - name: Check Code
           uses: actions/checkout@v4
 
-        - name: List downloaded files (Debugging)
-          run: ls -R
+        - name: Setup Python
+          uses: actions/setup-python@v5
+          with:              
+            python-version: '3.11' 
+            cache: 'pip'
+            cache-dependency-path: |
+              **/requirements*.txt
 
-        - name: Make files executable (Linux/Mac)
-          run: chmod +x Copypasta-* || true
-        - name: Create GitHub Release
-          uses: softprops/action-gh-release@v2
+        - name: install linux dependencies
+          if: matrix.platform.runs-on == 'ubuntu-latest'
+          run: |
+              sudo apt-get update
+              sudo apt-get install -y patchelf
+
+        - name: install python dependencies
+          run: | 
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+
+        - name: Nuitka Installation and Building
+          uses: Nuitka/Nuitka-Action@main
           with:
-            tag_name: ${{ github.ref_name }}
-            name: Release ${{ github.ref_name }}
+            nuitka-version: main
+            script-name: src/Main.py
+            mode: app
+
+        - name: Create Artifacts Directory
+          run: |
+            mkdir -p ./artifacts/
+          
+        - name: Prep Windows Artifact
+          if: matrix.platform.runs-on == 'windows-latest'
+          run: |
+            copy build/*.exe .\artifacts\
+        
+        - name: Prep Unix Artifact
+          if:  matrix.platform.runs-on != 'windows-latest'
+          run: |
+            cp build/*.bin ./artifacts/
+            cp build/*.app ./artifacts/
+          
+
+        - name: Upload Build Artifacts
+          uses: actions/upload-artifact@v4
+          with: 
+            name: ${{ matrix.platform.os-name }}-${{ matrix.platform.runs-on != 'windows-latest' && steps.get_version.outputs.new_tag || steps.get_version_win.outputs.new_tag }}
+            path: ./artifacts/
+
+    Release:
+      name: Create Release with Auto-Version
+      needs: Build
+      runs-on: ubuntu-latest
+
+      steps: 
+        - name: Check Code
+          uses: actions/checkout@v4
+        
+        - name: Download All Artifacts
+          uses: actions/download-artifact@v4
+          with:
+              path: ./artifacts/
+              pattern: "*"
+              merge-multiple: true
+
+        - name: Create GitHub Release
+          uses: actions/create-release@latest
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            release_name: Main Build and Release
+            tag_name: ${{ github.ref }}
             draft: false
             prerelease: false
-            files: |
-              Copypasta-Linux.bin
-              Copypasta-Windows.bin
-              Copypasta-MacOS.bin
-          env: 
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+
