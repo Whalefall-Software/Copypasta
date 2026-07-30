@@ -96,7 +96,7 @@ jobs:
             ls
             mv *.bin Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.bin
             cp *.bin ./artifacts/
-
+          shell: bash
 
         - name: Prep MacOS ARM Artifact
           if: matrix.platform.runs-on == 'macOS-latest'
@@ -104,6 +104,7 @@ jobs:
             ls
             mv *.app Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app
             cp -R Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app ./artifacts/
+          shell: bash
 
         - name: Prep MacOS Intel Artifact
           if: matrix.platform.runs-on == 'macOS-15-intel'
@@ -111,7 +112,7 @@ jobs:
             ls
             mv *.app Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app
             cp -R mv *.app Copypasta-${{ matrix.platform.runs-on }}-${{ github.ref_name }}.app ./artifacts/
-          
+          shell: bash
 
         - name: Upload Build Artifacts
           uses: actions/upload-artifact@v4
