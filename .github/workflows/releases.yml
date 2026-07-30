@@ -53,7 +53,7 @@ jobs:
           if: matrix.platform.runs-on == 'ubuntu-latest'
           run: | 
             ls
-            python -m nuitka --onefile Main.py
+            python -m nuitka --onefile src/Main.py
           shell: bash
         
         - name: Nuitka Installation and Building MacOS ARM64
@@ -87,7 +87,7 @@ jobs:
             dir
             copy build/*.exe .\artifacts\
           shell: powershell
-          
+
         - name: Prep Unix Artifact
           if:  matrix.platform.runs-on == 'linux-latest'
           run: |
