@@ -9,7 +9,7 @@ jobs:
     build:
         strategy: 
             matrix:
-                 os: [ubuntu-latest, macOS-latest, windows-latest]
+                 os: [ubuntu-latest] #, macOS-latest, windows-latest]
 
         runs-on: ${{ matrix.os }}
 
@@ -35,30 +35,23 @@ jobs:
           with:
             nuitka-version: main
             script-name: src/Main.py
-            mode: standalone
-          
-        - name: Check build file
-          run: |
-            find build/ -type f
+            mode: app
+            nuitka-options: |
+              --output-filename=Copypasta-${{ runner.os }}
 
-        - name: Rename executables
-          shell: bash
-          run: | 
-            if [ -f build/Main.bin ]; then
-            mv build/Main.bin build/Copypasta-Linux64x.bin
-              elif [ -f build/Main.app]; then
-            mv build/Main.app build/Copypasta-macOS.app
-              elif [-f build/Main.exe]; then
-            mv build/Main.exe build/Copypasta-Windows64x.exe 
-            fi
 
         - name: Upload artifact
           uses: actions/upload-artifact@v4
-          continue-on-error: true
           with:
-              name: executable-${{ matrix.os }} 
+              name: ${{ runner.os }} Build
+                
               path: |
-                build/Copypasta-*
+                build/*.exe
+                build/*.bin
+                build/*.app/**/*
+                build/*.dist/**/*
+              
+              if-no-files-found: error
 
     release:
         permissions: 
