@@ -1,9 +1,11 @@
 name: "[main] Build and Release"
 
 on: 
-    push:
-        branches: 
-            - main
+  push:
+    tags:
+      - 'v*'
+    branches: 
+      - main
 
 jobs:
     Build:
@@ -27,63 +29,6 @@ jobs:
       steps:
         - name: Check Code
           uses: actions/checkout@v4
-
-        - name: Verify GitHub CLI (gh)
-          if: matrix.platform.runs-on != 'windows-latest'
-          run: |
-            if ! command -v gh &> /dev/null; then
-              echo "GitHub CLI (gh) is not available on this runner"
-              exit 1
-            fi
-            gh --version
-
-        - name: Verify GitHub CLI (gh) on Windows
-          if: matrix.platform.runs-on == 'windows-latest'
-          run: |
-            gh --version
-
-        - name: Get next version (Unix)
-          if: matrix.platform.runs-on != 'windows-latest'
-          id: get_version
-          run: |
-            latest_tag=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo "v0.0.0")
-            echo "Latest tag: $latest_tag"
-
-            version=${latest_tag#v}
-            major=$(echo $version | cut -d. -f1)
-            minor=$(echo $version | cut -d. -f2)
-            patch=$(echo $version | cut -d. -f3)
-
-            patch=$((patch + 1))
-            new_version="v$major.$minor.$patch"
-
-            echo "New version: $new_version"
-            echo "new_tag=$new_version" >> "$GITHUB_OUTPUT"
-            echo "version_tag=$new_version" >> "$GITHUB_OUTPUT"
-
-        - name: Get next version (Windows)
-          if: matrix.platform.runs-on == 'windows-latest'
-          id: get_version_win
-          env:
-            GH_TOKEN: ${{ github.token }}
-
-          run: |
-            $latest_tag = (gh release list --limit 1 --json tagName | ConvertFrom-Json | Select-Object -First 1).tagName
-            if (-not $latest_tag) { $latest_tag = "v0.0.0" }
-            Write-Host "Latest tag: $latest_tag"
-
-            $version = $latest_tag -replace '^v', ''
-            $parts = $version -split '\.'
-            $major = [int]$parts[0]
-            $minor = [int]$parts[1]
-            $patch = [int]$parts[2]
-
-            $patch = $patch + 1
-            $new_version = "v$major.$minor.$patch"
-
-            Write-Host "New version: $new_version"
-            Write-Output "new_tag=$new_version" >> $env:GITHUB_OUTPUT
-            Write-Output "version_tag=$new_version" >> $env:GITHUB_OUTPUT
 
         - name: Setup Python
           uses: actions/setup-python@v5
@@ -111,14 +56,21 @@ jobs:
             script-name: src/Main.py
             mode: app
 
-        - name: create artifacts directory
+        - name: Create Artifacts Directory
           run: |
             mkdir -p ./artifacts/
           
-        - name: Prep Windows artifact
+        - name: Prep Windows Artifact
           if: matrix.platform.runs-on == 'windows-latest'
           run: |
             copy build/*.exe .\artifacts\
+        
+        - name: Prep Unix Artifact
+          if:  matrix.platform.runs-on != 'windows-latest'
+          run: |
+            cp build/*.bin ./artifacts/
+            cp build/*.app ./artifacts/
+          
 
         - name: Upload Build Artifacts
           uses: actions/upload-artifact@v4
@@ -135,29 +87,23 @@ jobs:
         - name: Check Code
           uses: actions/checkout@v4
         
-        - name: Calculate Next Release Version
-          id: get_tag
-          run: |
-            latest_tag=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo "v0.0.0")
-            echo "Latest tag: $latest_tag"
-          
-            version=${latest_tag#v}
-            major=$(echo $version | cut -d. -f1)
-            minor=$(echo $version | cut -d. -f2)
-            patch=$(echo $version | cut -d. -f3)
-          
-            patch=$((patch + 1))
-            new_version="v$major.$minor.$patch"
-
-            echo "New version: $new_version"
-            echo "new_tag=$new_version" >> "$GITHUB_OUTPUT"
-
         - name: Download All Artifacts
           uses: actions/download-artifact@v4
           with:
               path: ./artifacts/
               pattern: "*"
               merge-multiple: true
+
+        - name: Create GitHub Release
+          uses: actions/create-release@latest
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            release_name: Main Build and Release
+            tag_name: ${{ github.ref }}
+            draft: false
+            prerelease: false
+          
 
         - name: Create GitHub Release
           env:
